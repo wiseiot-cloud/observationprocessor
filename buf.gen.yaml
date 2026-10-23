@@ -1,0 +1,12 @@
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: .
+    opt:
+      - module=github.com/wiseiot-cloud/observationprocessor
+      - Mwiseiot/access/processor/v1/processor_runtime.proto=github.com/wiseiot-cloud/observationprocessor/internal/wire/processor
+  - local: protoc-gen-go-grpc
+    out: .
+    opt:
+      - module=github.com/wiseiot-cloud/observationprocessor
+      - Mwiseiot/access/processor/v1/processor_runtime.proto=github.com/wiseiot-cloud/observationprocessor/internal/wire/processor
