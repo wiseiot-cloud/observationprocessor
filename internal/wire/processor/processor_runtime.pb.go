@@ -83,6 +83,11 @@ const (
 	ProtocolStatus_PROTOCOL_STATUS_SOURCE_UNRESOLVED ProtocolStatus = 3
 	ProtocolStatus_PROTOCOL_STATUS_UNBOUND           ProtocolStatus = 4
 	ProtocolStatus_PROTOCOL_STATUS_MISMATCH          ProtocolStatus = 5
+	// A system observation that Access itself produced, under a reserved protocol "wiz.access.*",
+	// classified without protocols, routes or bindings: it has no source and no protocol
+	// definition. The session events of a device under "wiz.access.session:1", whose payload
+	// system/session-v1.schema.json describes, are the only system observations.
+	ProtocolStatus_PROTOCOL_STATUS_SYSTEM ProtocolStatus = 6
 )
 
 // Enum value maps for ProtocolStatus.
@@ -94,6 +99,7 @@ var (
 		3: "PROTOCOL_STATUS_SOURCE_UNRESOLVED",
 		4: "PROTOCOL_STATUS_UNBOUND",
 		5: "PROTOCOL_STATUS_MISMATCH",
+		6: "PROTOCOL_STATUS_SYSTEM",
 	}
 	ProtocolStatus_value = map[string]int32{
 		"PROTOCOL_STATUS_UNSPECIFIED":       0,
@@ -102,6 +108,7 @@ var (
 		"PROTOCOL_STATUS_SOURCE_UNRESOLVED": 3,
 		"PROTOCOL_STATUS_UNBOUND":           4,
 		"PROTOCOL_STATUS_MISMATCH":          5,
+		"PROTOCOL_STATUS_SYSTEM":            6,
 	}
 )
 
@@ -674,7 +681,9 @@ func (*CloseSessionResponse) Descriptor() ([]byte, []int) {
 }
 
 // An observation matches a field when the field is empty or one of its values equals the
-// observation's, and the filter when it matches every field.
+// observation's, and the filter when it matches every field. A filter without claimed_protocols
+// therefore also selects the system observations; one with claimed_protocols selects them only
+// when it lists their reserved protocol, such as "wiz.access.session:1".
 type Filter struct {
 	state                   protoimpl.MessageState `protogen:"open.v1"`
 	ClaimedProtocols        []string               `protobuf:"bytes,1,rep,name=claimed_protocols,json=claimedProtocols,proto3" json:"claimed_protocols,omitempty"`
@@ -789,14 +798,15 @@ type Observation struct {
 	PhysicalSourceKey      string         `protobuf:"bytes,14,opt,name=physical_source_key,json=physicalSourceKey,proto3" json:"physical_source_key,omitempty"`
 	ResolvedSourceDeviceId string         `protobuf:"bytes,15,opt,name=resolved_source_device_id,json=resolvedSourceDeviceId,proto3" json:"resolved_source_device_id,omitempty"`
 	ResolvedSourceKey      string         `protobuf:"bytes,16,opt,name=resolved_source_key,json=resolvedSourceKey,proto3" json:"resolved_source_key,omitempty"`
-	// The producer's original RFC 3339 text.
+	// The producer's original RFC 3339 text; Access produces that of a system observation.
 	ObservedAt string                 `protobuf:"bytes,17,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
 	ReceivedAt *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=received_at,json=receivedAt,proto3" json:"received_at,omitempty"`
 	// The exact bytes of the payload JSON value.
 	Payload []byte `protobuf:"bytes,19,opt,name=payload,proto3" json:"payload,omitempty"`
-	// The label of the resolved source device at acceptance; empty without one.
+	// The label of the resolved source device at acceptance, or of the principal device for a
+	// system observation; empty without one.
 	Label string `protobuf:"bytes,20,opt,name=label,proto3" json:"label,omitempty"`
-	// The tags of the resolved source device at acceptance; empty without.
+	// The tags of the same device at acceptance; empty without.
 	Tags          map[string]string `protobuf:"bytes,21,rep,name=tags,proto3" json:"tags,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1192,14 +1202,15 @@ const file_wiseiot_access_processor_v1_processor_runtime_proto_rawDesc = "" +
 	"\x0eProcessorState\x12\x1f\n" +
 	"\x1bPROCESSOR_STATE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16PROCESSOR_STATE_ACTIVE\x10\x01\x12\x1a\n" +
-	"\x16PROCESSOR_STATE_PAUSED\x10\x02*\xd2\x01\n" +
+	"\x16PROCESSOR_STATE_PAUSED\x10\x02*\xee\x01\n" +
 	"\x0eProtocolStatus\x12\x1f\n" +
 	"\x1bPROTOCOL_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17PROTOCOL_STATUS_MATCHED\x10\x01\x12 \n" +
 	"\x1cPROTOCOL_STATUS_UNREGISTERED\x10\x02\x12%\n" +
 	"!PROTOCOL_STATUS_SOURCE_UNRESOLVED\x10\x03\x12\x1b\n" +
 	"\x17PROTOCOL_STATUS_UNBOUND\x10\x04\x12\x1c\n" +
-	"\x18PROTOCOL_STATUS_MISMATCH\x10\x052\xac\x04\n" +
+	"\x18PROTOCOL_STATUS_MISMATCH\x10\x05\x12\x1a\n" +
+	"\x16PROTOCOL_STATUS_SYSTEM\x10\x062\xac\x04\n" +
 	"\x17ProcessorRuntimeService\x12p\n" +
 	"\vOpenSession\x12/.wiseiot.access.processor.v1.OpenSessionRequest\x1a0.wiseiot.access.processor.v1.OpenSessionResponse\x12j\n" +
 	"\tHeartbeat\x12-.wiseiot.access.processor.v1.HeartbeatRequest\x1a..wiseiot.access.processor.v1.HeartbeatResponse\x12[\n" +

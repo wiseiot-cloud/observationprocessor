@@ -71,6 +71,11 @@ enum ProtocolStatus {
   PROTOCOL_STATUS_SOURCE_UNRESOLVED = 3;
   PROTOCOL_STATUS_UNBOUND = 4;
   PROTOCOL_STATUS_MISMATCH = 5;
+  // A system observation that Access itself produced, under a reserved protocol "wiz.access.*",
+  // classified without protocols, routes or bindings: it has no source and no protocol
+  // definition. The session events of a device under "wiz.access.session:1", whose payload
+  // system/session-v1.schema.json describes, are the only system observations.
+  PROTOCOL_STATUS_SYSTEM = 6;
 }
 
 message OpenSessionRequest {
@@ -136,7 +141,9 @@ message CloseSessionRequest {
 message CloseSessionResponse {}
 
 // An observation matches a field when the field is empty or one of its values equals the
-// observation's, and the filter when it matches every field.
+// observation's, and the filter when it matches every field. A filter without claimed_protocols
+// therefore also selects the system observations; one with claimed_protocols selects them only
+// when it lists their reserved protocol, such as "wiz.access.session:1".
 message Filter {
   repeated string claimed_protocols = 1;
   repeated string protocol_definition_ids = 2;
@@ -168,14 +175,15 @@ message Observation {
   string physical_source_key = 14;
   string resolved_source_device_id = 15;
   string resolved_source_key = 16;
-  // The producer's original RFC 3339 text.
+  // The producer's original RFC 3339 text; Access produces that of a system observation.
   string observed_at = 17;
   google.protobuf.Timestamp received_at = 18;
   // The exact bytes of the payload JSON value.
   bytes payload = 19;
-  // The label of the resolved source device at acceptance; empty without one.
+  // The label of the resolved source device at acceptance, or of the principal device for a
+  // system observation; empty without one.
   string label = 20;
-  // The tags of the resolved source device at acceptance; empty without.
+  // The tags of the same device at acceptance; empty without.
   map<string, string> tags = 21;
 }
 

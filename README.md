@@ -50,6 +50,12 @@ label that the resolved source device had when Access accepted the observation, 
 and `Tags` its key-value tags then, nil without tags. Neither changes when the device is relabeled
 or retagged later; the `Filter` selects on labels but never on tags.
 
+Access also produces observations of its own: the session events of a device, under the reserved
+protocol `wiz.access.session:1`, with `ProtocolStatus` `ProtocolSystem`, no source and the device as
+principal; their payload is the JSON object of `proto/wiseiot/access/processor/v1/system/session-v1.schema.json`
+in the Access repository. A `Filter` with `ClaimedProtocols` receives them only when it lists that
+protocol; a `Filter` without `ClaimedProtocols` receives them too.
+
 `Run` returns `nil` after `Shutdown`, `ctx.Err()` when its context ends, and otherwise the `*Error`
 that retrying cannot fix. `Run` may be called once per `Processor`.
 

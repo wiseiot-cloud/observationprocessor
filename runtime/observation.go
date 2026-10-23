@@ -23,6 +23,9 @@ const (
 	ProtocolUnbound ProtocolStatus = "unbound"
 	// ProtocolMismatch: the source is bound to other protocols, but not to the claimed one.
 	ProtocolMismatch ProtocolStatus = "mismatch"
+	// ProtocolSystem: a system observation that Access itself produced, such as a session event
+	// under the reserved protocol wiz.access.session:1; it has no source and no classification.
+	ProtocolSystem ProtocolStatus = "system"
 )
 
 // Observation is a raw observation that Access accepted. Absent optional values are empty.
@@ -115,4 +118,5 @@ var protocolStatuses = map[wire.ProtocolStatus]ProtocolStatus{
 	wire.ProtocolStatus_PROTOCOL_STATUS_SOURCE_UNRESOLVED: ProtocolSourceUnresolved,
 	wire.ProtocolStatus_PROTOCOL_STATUS_UNBOUND:           ProtocolUnbound,
 	wire.ProtocolStatus_PROTOCOL_STATUS_MISMATCH:          ProtocolMismatch,
+	wire.ProtocolStatus_PROTOCOL_STATUS_SYSTEM:            ProtocolSystem,
 }
