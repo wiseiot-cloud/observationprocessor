@@ -119,7 +119,8 @@ An Inbox cannot make a call of an external API exactly once; use the idempotency
 A transient failure of Access (`ErrorUnavailable`, `ErrorInternal`) is retried: a Read reads the page
 again, a Commit commits the same offset again, a heartbeat waits for the next one, and `OpenSession`
 backs off. `Run` ends with `ErrorUnauthenticated`, `ErrorPermissionDenied` (the API token lacks the
-`processor` scope), `ErrorProcessorNotFound`, `ErrorInvalidArgument`, `ErrorOffsetOutOfRange` or
+`processor` scope, or is limited to device labels that do not cover the processor's filter labels),
+`ErrorProcessorNotFound`, `ErrorInvalidArgument`, `ErrorOffsetOutOfRange` or
 `ErrorDataGap`. Test codes with `errors.Is(err, processor.ErrorDataGap)` and read the details with
 `errors.As(err, &e)` for an `e *processor.Error`.
 
