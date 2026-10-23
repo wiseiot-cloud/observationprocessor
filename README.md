@@ -200,3 +200,7 @@ checkpoints and lags are over REST at `GET /acs/v1/observation-processors/{proce
 contract. When it changes there, sync it, run `make generate`, adapt the SDK and tag a release
 `vX.Y.Z`; Access then pins that release with
 `go get -tool github.com/wiseiot-cloud/observationprocessor/examples/printer@vX.Y.Z`.
+
+## License
+
+Apache License 2.0; see [LICENSE](LICENSE).
