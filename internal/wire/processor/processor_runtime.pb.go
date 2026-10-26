@@ -73,7 +73,8 @@ func (ProcessorState) EnumDescriptor() ([]byte, []int) {
 	return file_wiseiot_access_processor_v1_processor_runtime_proto_rawDescGZIP(), []int{0}
 }
 
-// How the protocol that an observation claims relates to the protocols bound to its source.
+// How the name of the protocol that an observation claims relates to the protocol names bound to
+// its source; the version never matters.
 type ProtocolStatus int32
 
 const (
@@ -84,8 +85,7 @@ const (
 	ProtocolStatus_PROTOCOL_STATUS_UNBOUND           ProtocolStatus = 4
 	ProtocolStatus_PROTOCOL_STATUS_MISMATCH          ProtocolStatus = 5
 	// A system observation that Access itself produced, under a reserved protocol "wiz.access.*",
-	// classified without protocols, routes or bindings: it has no source and no protocol
-	// definition. The session events of a device under "wiz.access.session:1", whose payload
+	// classified without protocols, routes or bindings: it has no source. The session events of a device under "wiz.access.session:1", whose payload
 	// system/session-v1.schema.json describes, are the only system observations.
 	ProtocolStatus_PROTOCOL_STATUS_SYSTEM ProtocolStatus = 6
 )
@@ -684,12 +684,13 @@ func (*CloseSessionResponse) Descriptor() ([]byte, []int) {
 // observation's, and the filter when it matches every field. A system observation has its device
 // as principal and the label of that device, a reserved protocol such as "wiz.access.session:1"
 // and PROTOCOL_STATUS_SYSTEM, and no gateway group or resolved source device: a filter selects it
-// only without gateway_group_ids and resolved_source_device_ids, and with claimed_protocols or
-// protocol_statuses only when they list its protocol or PROTOCOL_STATUS_SYSTEM.
+// only without gateway_group_ids and resolved_source_device_ids, and with protocol_names or
+// protocol_statuses only when they list its protocol name ("wiz.access.session") or
+// PROTOCOL_STATUS_SYSTEM.
 type Filter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The protocols that observations claim, registered or not.
-	ClaimedProtocols []string `protobuf:"bytes,1,rep,name=claimed_protocols,json=claimedProtocols,proto3" json:"claimed_protocols,omitempty"`
+	// The names of the protocols that observations claim, in any version, registered or not.
+	ProtocolNames []string `protobuf:"bytes,1,rep,name=protocol_names,json=protocolNames,proto3" json:"protocol_names,omitempty"`
 	// The devices that published observations over their own session; for a radio reception the
 	// gateway that received it first, so a gateway selects only some radio receptions of its group.
 	PrincipalDeviceIds []string `protobuf:"bytes,3,rep,name=principal_device_ids,json=principalDeviceIds,proto3" json:"principal_device_ids,omitempty"`
@@ -734,9 +735,9 @@ func (*Filter) Descriptor() ([]byte, []int) {
 	return file_wiseiot_access_processor_v1_processor_runtime_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *Filter) GetClaimedProtocols() []string {
+func (x *Filter) GetProtocolNames() []string {
 	if x != nil {
-		return x.ClaimedProtocols
+		return x.ProtocolNames
 	}
 	return nil
 }
@@ -789,11 +790,12 @@ type Observation struct {
 	SessionId       string `protobuf:"bytes,6,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	ConnectionEpoch uint64 `protobuf:"varint,7,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`
 	// The publicationId of a radio reception.
-	DeliveryId             string         `protobuf:"bytes,8,opt,name=delivery_id,json=deliveryId,proto3" json:"delivery_id,omitempty"`
-	EntryIndex             uint32         `protobuf:"varint,9,opt,name=entry_index,json=entryIndex,proto3" json:"entry_index,omitempty"`
+	DeliveryId string `protobuf:"bytes,8,opt,name=delivery_id,json=deliveryId,proto3" json:"delivery_id,omitempty"`
+	EntryIndex uint32 `protobuf:"varint,9,opt,name=entry_index,json=entryIndex,proto3" json:"entry_index,omitempty"`
+	// The protocol reference "<name>:<version>" as the producer stated it. Access uses only the
+	// name, the text before the first colon; the version is for the decoder of the payload.
 	ClaimedProtocol        string         `protobuf:"bytes,10,opt,name=claimed_protocol,json=claimedProtocol,proto3" json:"claimed_protocol,omitempty"`
 	ProtocolStatus         ProtocolStatus `protobuf:"varint,11,opt,name=protocol_status,json=protocolStatus,proto3,enum=wiseiot.access.processor.v1.ProtocolStatus" json:"protocol_status,omitempty"`
-	ProtocolDefinitionId   string         `protobuf:"bytes,12,opt,name=protocol_definition_id,json=protocolDefinitionId,proto3" json:"protocol_definition_id,omitempty"`
 	ClaimedSourceKey       string         `protobuf:"bytes,13,opt,name=claimed_source_key,json=claimedSourceKey,proto3" json:"claimed_source_key,omitempty"`
 	PhysicalSourceKey      string         `protobuf:"bytes,14,opt,name=physical_source_key,json=physicalSourceKey,proto3" json:"physical_source_key,omitempty"`
 	ResolvedSourceDeviceId string         `protobuf:"bytes,15,opt,name=resolved_source_device_id,json=resolvedSourceDeviceId,proto3" json:"resolved_source_device_id,omitempty"`
@@ -917,13 +919,6 @@ func (x *Observation) GetProtocolStatus() ProtocolStatus {
 		return x.ProtocolStatus
 	}
 	return ProtocolStatus_PROTOCOL_STATUS_UNSPECIFIED
-}
-
-func (x *Observation) GetProtocolDefinitionId() string {
-	if x != nil {
-		return x.ProtocolDefinitionId
-	}
-	return ""
 }
 
 func (x *Observation) GetClaimedSourceKey() string {
@@ -1150,14 +1145,14 @@ const file_wiseiot_access_processor_v1_processor_runtime_proto_rawDesc = "" +
 	"\x13CloseSessionRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\"\x16\n" +
-	"\x14CloseSessionResponse\"\xc2\x02\n" +
-	"\x06Filter\x12+\n" +
-	"\x11claimed_protocols\x18\x01 \x03(\tR\x10claimedProtocols\x120\n" +
+	"\x14CloseSessionResponse\"\xbc\x02\n" +
+	"\x06Filter\x12%\n" +
+	"\x0eprotocol_names\x18\x01 \x03(\tR\rprotocolNames\x120\n" +
 	"\x14principal_device_ids\x18\x03 \x03(\tR\x12principalDeviceIds\x12*\n" +
 	"\x11gateway_group_ids\x18\x04 \x03(\tR\x0fgatewayGroupIds\x12;\n" +
 	"\x1aresolved_source_device_ids\x18\x05 \x03(\tR\x17resolvedSourceDeviceIds\x12X\n" +
 	"\x11protocol_statuses\x18\x06 \x03(\x0e2+.wiseiot.access.processor.v1.ProtocolStatusR\x10protocolStatuses\x12\x16\n" +
-	"\x06labels\x18\a \x03(\tR\x06labels\"\xdf\a\n" +
+	"\x06labels\x18\a \x03(\tR\x06labels\"\xa9\a\n" +
 	"\vObservation\x12%\n" +
 	"\x0eobservation_id\x18\x01 \x01(\tR\robservationId\x12\x1c\n" +
 	"\tpartition\x18\x02 \x01(\rR\tpartition\x12\x16\n" +
@@ -1173,8 +1168,7 @@ const file_wiseiot_access_processor_v1_processor_runtime_proto_rawDesc = "" +
 	"entryIndex\x12)\n" +
 	"\x10claimed_protocol\x18\n" +
 	" \x01(\tR\x0fclaimedProtocol\x12T\n" +
-	"\x0fprotocol_status\x18\v \x01(\x0e2+.wiseiot.access.processor.v1.ProtocolStatusR\x0eprotocolStatus\x124\n" +
-	"\x16protocol_definition_id\x18\f \x01(\tR\x14protocolDefinitionId\x12,\n" +
+	"\x0fprotocol_status\x18\v \x01(\x0e2+.wiseiot.access.processor.v1.ProtocolStatusR\x0eprotocolStatus\x12,\n" +
 	"\x12claimed_source_key\x18\r \x01(\tR\x10claimedSourceKey\x12.\n" +
 	"\x13physical_source_key\x18\x0e \x01(\tR\x11physicalSourceKey\x129\n" +
 	"\x19resolved_source_device_id\x18\x0f \x01(\tR\x16resolvedSourceDeviceId\x12.\n" +

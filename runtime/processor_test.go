@@ -229,7 +229,7 @@ func TestSnapshotReportsTheFilterAndThePartitions(t *testing.T) {
 		return s.State == processor.StateDegraded && len(s.Partitions) == 2 && !s.Partitions[1].LastCommitAt.IsZero()
 	})
 	s := p.Snapshot()
-	if want := (processor.Filter{ClaimedProtocols: []string{"acme.meter:1"}}); !reflect.DeepEqual(s.Filter, want) {
+	if want := (processor.Filter{ProtocolNames: []string{"acme.meter"}}); !reflect.DeepEqual(s.Filter, want) {
 		t.Errorf("filter = %+v, want %+v", s.Filter, want)
 	}
 	if got := s.Partitions[0]; got.Partition != 0 || got.HighWatermark != 3 || got.Lag != 3 || got.Checkpoint != 0 ||
@@ -259,7 +259,7 @@ func TestSnapshotReportsTheFilterAndThePartitions(t *testing.T) {
 	// A new session answers the new filter, and its partitions start over.
 	readsFail.Store(true)
 	f.changeFilter(&wire.Filter{
-		ClaimedProtocols: []string{"acme.meter:1"}, PrincipalDeviceIds: []string{"principal"},
+		ProtocolNames: []string{"acme.meter"}, PrincipalDeviceIds: []string{"principal"},
 		GatewayGroupIds: []string{"group"}, ResolvedSourceDeviceIds: []string{"source"},
 		ProtocolStatuses: []wire.ProtocolStatus{wire.ProtocolStatus_PROTOCOL_STATUS_MATCHED, wire.ProtocolStatus_PROTOCOL_STATUS_MISMATCH},
 		Labels:           []string{"site-a"},
@@ -270,7 +270,7 @@ func TestSnapshotReportsTheFilterAndThePartitions(t *testing.T) {
 	})
 	s = p.Snapshot()
 	want := processor.Filter{
-		ClaimedProtocols: []string{"acme.meter:1"}, PrincipalDeviceIDs: []string{"principal"},
+		ProtocolNames: []string{"acme.meter"}, PrincipalDeviceIDs: []string{"principal"},
 		GatewayGroupIDs: []string{"group"}, ResolvedSourceDeviceIDs: []string{"source"},
 		ProtocolStatuses: []processor.ProtocolStatus{processor.ProtocolMatched, processor.ProtocolMismatch},
 		Labels:           []string{"site-a"},

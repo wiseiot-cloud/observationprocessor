@@ -75,7 +75,9 @@ type PartitionSnapshot struct {
 
 // Filter is the filter of a processor: which raw observations it receives.
 type Filter struct {
-	ClaimedProtocols []string
+	// ProtocolNames matches the name of the claimed protocol, the text before its colon, so it
+	// receives every version of each protocol.
+	ProtocolNames []string
 	// PrincipalDeviceIDs matches the publishing device; for a radio reception the gateway that
 	// received it first.
 	PrincipalDeviceIDs []string
@@ -96,7 +98,7 @@ func filterFrom(f *wire.Filter) Filter {
 		statuses = append(statuses, protocolStatuses[status])
 	}
 	return Filter{
-		ClaimedProtocols:        f.GetClaimedProtocols(),
+		ProtocolNames:           f.GetProtocolNames(),
 		PrincipalDeviceIDs:      f.GetPrincipalDeviceIds(),
 		GatewayGroupIDs:         f.GetGatewayGroupIds(),
 		ResolvedSourceDeviceIDs: f.GetResolvedSourceDeviceIds(),

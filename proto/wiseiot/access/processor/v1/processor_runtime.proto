@@ -63,7 +63,8 @@ enum ProcessorState {
   PROCESSOR_STATE_PAUSED = 2;
 }
 
-// How the protocol that an observation claims relates to the protocols bound to its source.
+// How the name of the protocol that an observation claims relates to the protocol names bound to
+// its source; the version never matters.
 enum ProtocolStatus {
   PROTOCOL_STATUS_UNSPECIFIED = 0;
   PROTOCOL_STATUS_MATCHED = 1;
@@ -72,8 +73,7 @@ enum ProtocolStatus {
   PROTOCOL_STATUS_UNBOUND = 4;
   PROTOCOL_STATUS_MISMATCH = 5;
   // A system observation that Access itself produced, under a reserved protocol "wiz.access.*",
-  // classified without protocols, routes or bindings: it has no source and no protocol
-  // definition. The session events of a device under "wiz.access.session:1", whose payload
+  // classified without protocols, routes or bindings: it has no source. The session events of a device under "wiz.access.session:1", whose payload
   // system/session-v1.schema.json describes, are the only system observations.
   PROTOCOL_STATUS_SYSTEM = 6;
 }
@@ -144,11 +144,12 @@ message CloseSessionResponse {}
 // observation's, and the filter when it matches every field. A system observation has its device
 // as principal and the label of that device, a reserved protocol such as "wiz.access.session:1"
 // and PROTOCOL_STATUS_SYSTEM, and no gateway group or resolved source device: a filter selects it
-// only without gateway_group_ids and resolved_source_device_ids, and with claimed_protocols or
-// protocol_statuses only when they list its protocol or PROTOCOL_STATUS_SYSTEM.
+// only without gateway_group_ids and resolved_source_device_ids, and with protocol_names or
+// protocol_statuses only when they list its protocol name ("wiz.access.session") or
+// PROTOCOL_STATUS_SYSTEM.
 message Filter {
-  // The protocols that observations claim, registered or not.
-  repeated string claimed_protocols = 1;
+  // The names of the protocols that observations claim, in any version, registered or not.
+  repeated string protocol_names = 1;
   // The devices that published observations over their own session; for a radio reception the
   // gateway that received it first, so a gateway selects only some radio receptions of its group.
   repeated string principal_device_ids = 3;
@@ -175,9 +176,10 @@ message Observation {
   // The publicationId of a radio reception.
   string delivery_id = 8;
   uint32 entry_index = 9;
+  // The protocol reference "<name>:<version>" as the producer stated it. Access uses only the
+  // name, the text before the first colon; the version is for the decoder of the payload.
   string claimed_protocol = 10;
   ProtocolStatus protocol_status = 11;
-  string protocol_definition_id = 12;
   string claimed_source_key = 13;
   string physical_source_key = 14;
   string resolved_source_device_id = 15;

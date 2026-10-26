@@ -75,7 +75,7 @@ func newFake(t *testing.T, partitions int) *fake {
 	t.Helper()
 	f := &fake{
 		changed: make([]chan struct{}, partitions), state: wire.ProcessorState_PROCESSOR_STATE_ACTIVE, interval: 50 * time.Millisecond,
-		filter:     &wire.Filter{ClaimedProtocols: []string{"acme.meter:1"}},
+		filter:     &wire.Filter{ProtocolNames: []string{"acme.meter"}},
 		partitions: make([][]*wire.Observation, partitions), checkpoints: make([]uint64, partitions), reading: map[int]bool{},
 	}
 	for partition := range f.changed {

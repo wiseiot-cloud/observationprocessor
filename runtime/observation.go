@@ -21,10 +21,10 @@ const (
 	ProtocolSourceUnresolved ProtocolStatus = "source_unresolved"
 	// ProtocolUnbound: the source is bound to no protocol.
 	ProtocolUnbound ProtocolStatus = "unbound"
-	// ProtocolMismatch: the source is bound to other protocols, but not to the claimed one.
+	// ProtocolMismatch: the source is bound to other protocols, but not to the name of the claimed one.
 	ProtocolMismatch ProtocolStatus = "mismatch"
 	// ProtocolSystem: a system observation that Access itself produced, such as a session event
-	// under the reserved protocol wiz.access.session:1; it has no source and no classification.
+	// under the reserved protocol wiz.access.session; it has no source and no classification.
 	ProtocolSystem ProtocolStatus = "system"
 )
 
@@ -42,11 +42,13 @@ type Observation struct {
 	ConnectionEpoch int64
 	// DeliveryID is the deliveryId of the ObservationBatch, or the publicationId of a radio
 	// reception.
-	DeliveryID             string
-	EntryIndex             int
+	DeliveryID string
+	EntryIndex int
+	// ClaimedProtocol is the protocol reference "<name>:<version>" as the producer stated it.
+	// Access classifies and selects by the name, the text before the first colon; the version
+	// tells the Handler how to decode Payload.
 	ClaimedProtocol        string
 	ProtocolStatus         ProtocolStatus
-	ProtocolDefinitionID   string
 	ClaimedSourceKey       string
 	PhysicalSourceKey      string
 	ResolvedSourceDeviceID string
@@ -99,7 +101,6 @@ func observationFrom(o *wire.Observation) Observation {
 		EntryIndex:             int(o.GetEntryIndex()),
 		ClaimedProtocol:        o.GetClaimedProtocol(),
 		ProtocolStatus:         protocolStatuses[o.GetProtocolStatus()],
-		ProtocolDefinitionID:   o.GetProtocolDefinitionId(),
 		ClaimedSourceKey:       o.GetClaimedSourceKey(),
 		PhysicalSourceKey:      o.GetPhysicalSourceKey(),
 		ResolvedSourceDeviceID: o.GetResolvedSourceDeviceId(),

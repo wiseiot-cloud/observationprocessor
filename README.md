@@ -50,11 +50,16 @@ label that the resolved source device had when Access accepted the observation, 
 and `Tags` its key-value tags then, nil without tags. Neither changes when the device is relabeled
 or retagged later; the `Filter` selects on labels but never on tags.
 
+`ClaimedProtocol` is the protocol reference `<name>:<version>` as the device stated it. Access
+registers, binds, classifies and selects by the name only, so a `Filter` with
+`ProtocolNames: []string{"acme.meter"}` receives `acme.meter:1` and `acme.meter:2` alike; the
+version is between the device and the Handler, which picks the decoder of `Payload` by it.
+
 Access also produces observations of its own: the session events of a device, under the reserved
-protocol `wiz.access.session:1`, with `ProtocolStatus` `ProtocolSystem`, no source and the device as
+protocol `wiz.access.session` (reference `wiz.access.session:1`), with `ProtocolStatus` `ProtocolSystem`, no source and the device as
 principal; their payload is the JSON object of `proto/wiseiot/access/processor/v1/system/session-v1.schema.json`
-in the Access repository. A `Filter` with `ClaimedProtocols` receives them only when it lists that
-protocol; a `Filter` without `ClaimedProtocols` receives them too. They carry the label of the
+in the Access repository. A `Filter` with `ProtocolNames` receives them only when it lists that
+name; a `Filter` without `ProtocolNames` receives them too. They carry the label of the
 device but no gateway group and no resolved source device, so `PrincipalDeviceIDs` and `Labels`
 select them, while a `Filter` with `GatewayGroupIDs` or `ResolvedSourceDeviceIDs` never does.
 
@@ -176,7 +181,7 @@ otherwise. `AllowInsecure` dials without TLS and is accepted only for a loopback
   sum over the partitions), the time of the last commit, and the code and time of the last error.
   It is cheap and safe for concurrent use, and returns a copy.
 - `Snapshot.Filter` is the filter as the `OpenSession` of the current or last session answered it
-  (claimed protocols, principal devices, gateway groups, resolved source devices, protocol statuses
+  (protocol names, principal devices, gateway groups, resolved source devices, protocol statuses
   and labels); it is the zero `Filter` before the first session, which
   `OwnerEpoch` 0 tells.
 - `Snapshot.Partitions` has one `PartitionSnapshot` per partition of the current or last session, in
