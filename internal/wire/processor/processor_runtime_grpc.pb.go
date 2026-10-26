@@ -32,7 +32,7 @@ const (
 //
 // ProcessorRuntimeService is served by wiz-acs-core for the runtime of Observation Processors,
 // such as the Go SDK. Every call carries the metadata "authorization: Bearer <API token>", with
-// an API token of the REST API that holds the processor scope. A token limited to device labels
+// an API token of the REST API that holds the runtime scope. A token limited to device labels
 // may open only a processor whose filter selects labels, all of them labels of the token; since a
 // filter change fences the session, the check at OpenSession covers the whole session.
 //
@@ -44,7 +44,7 @@ const (
 // Every error that the service answers has one ErrorDetail, whose code is one of:
 //
 //	UNAUTHENTICATED      unauthenticated      no valid API token, for whatever reason
-//	PERMISSION_DENIED    permission_denied    the API token lacks the processor scope, or
+//	PERMISSION_DENIED    permission_denied    the API token lacks the runtime scope, or
 //	                                         OpenSession of a processor outside its labels
 //	INVALID_ARGUMENT     invalid_argument     a request field is invalid; the message names it
 //	NOT_FOUND            not_found            OpenSession of an unknown processor
@@ -143,7 +143,7 @@ func (c *processorRuntimeServiceClient) CloseSession(ctx context.Context, in *Cl
 //
 // ProcessorRuntimeService is served by wiz-acs-core for the runtime of Observation Processors,
 // such as the Go SDK. Every call carries the metadata "authorization: Bearer <API token>", with
-// an API token of the REST API that holds the processor scope. A token limited to device labels
+// an API token of the REST API that holds the runtime scope. A token limited to device labels
 // may open only a processor whose filter selects labels, all of them labels of the token; since a
 // filter change fences the session, the check at OpenSession covers the whole session.
 //
@@ -155,7 +155,7 @@ func (c *processorRuntimeServiceClient) CloseSession(ctx context.Context, in *Cl
 // Every error that the service answers has one ErrorDetail, whose code is one of:
 //
 //	UNAUTHENTICATED      unauthenticated      no valid API token, for whatever reason
-//	PERMISSION_DENIED    permission_denied    the API token lacks the processor scope, or
+//	PERMISSION_DENIED    permission_denied    the API token lacks the runtime scope, or
 //	                                         OpenSession of a processor outside its labels
 //	INVALID_ARGUMENT     invalid_argument     a request field is invalid; the message names it
 //	NOT_FOUND            not_found            OpenSession of an unknown processor

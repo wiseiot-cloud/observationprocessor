@@ -54,7 +54,9 @@ Access also produces observations of its own: the session events of a device, un
 protocol `wiz.access.session:1`, with `ProtocolStatus` `ProtocolSystem`, no source and the device as
 principal; their payload is the JSON object of `proto/wiseiot/access/processor/v1/system/session-v1.schema.json`
 in the Access repository. A `Filter` with `ClaimedProtocols` receives them only when it lists that
-protocol; a `Filter` without `ClaimedProtocols` receives them too.
+protocol; a `Filter` without `ClaimedProtocols` receives them too. They carry the label of the
+device but no gateway group and no resolved source device, so `PrincipalDeviceIDs` and `Labels`
+select them, while a `Filter` with `GatewayGroupIDs` or `ResolvedSourceDeviceIDs` never does.
 
 `Run` returns `nil` after `Shutdown`, `ctx.Err()` when its context ends, and otherwise the `*Error`
 that retrying cannot fix. `Run` may be called once per `Processor`.
@@ -125,7 +127,7 @@ An Inbox cannot make a call of an external API exactly once; use the idempotency
 A transient failure of Access (`ErrorUnavailable`, `ErrorInternal`) is retried: a Read reads the page
 again, a Commit commits the same offset again, a heartbeat waits for the next one, and `OpenSession`
 backs off. `Run` ends with `ErrorUnauthenticated`, `ErrorPermissionDenied` (the API token lacks the
-`processor` scope, or is limited to device labels that do not cover the processor's filter labels),
+`runtime` scope, or is limited to device labels that do not cover the processor's filter labels),
 `ErrorProcessorNotFound`, `ErrorInvalidArgument`, `ErrorOffsetOutOfRange` or
 `ErrorDataGap`. Test codes with `errors.Is(err, processor.ErrorDataGap)` and read the details with
 `errors.As(err, &e)` for an `e *processor.Error`.
@@ -157,7 +159,7 @@ application.
 
 ## Credentials and transport
 
-Every call presents an Access API token that holds the `processor` scope, as
+Every call presents an Access API token that holds the `runtime` scope, as
 `authorization: Bearer <token>`; a token for a processor needs no other scope. `Credential` provides
 it before every call: `StaticToken`, `FileToken` (read for every call, so replacing the file rotates
 the token) or a `CredentialProviderFunc`. A failing provider ends `Run` with `ErrorUnauthenticated`.
@@ -174,8 +176,8 @@ otherwise. `AllowInsecure` dials without TLS and is accepted only for a loopback
   sum over the partitions), the time of the last commit, and the code and time of the last error.
   It is cheap and safe for concurrent use, and returns a copy.
 - `Snapshot.Filter` is the filter as the `OpenSession` of the current or last session answered it
-  (claimed protocols, protocol definitions, principal devices, gateway groups, resolved source
-  devices, protocol statuses and labels); it is the zero `Filter` before the first session, which
+  (claimed protocols, principal devices, gateway groups, resolved source devices, protocol statuses
+  and labels); it is the zero `Filter` before the first session, which
   `OwnerEpoch` 0 tells.
 - `Snapshot.Partitions` has one `PartitionSnapshot` per partition of the current or last session, in
   partition order: `HighWatermark` and `LastReadAt` of its latest Read, `Lag` (that high watermark

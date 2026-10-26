@@ -259,7 +259,7 @@ func TestSnapshotReportsTheFilterAndThePartitions(t *testing.T) {
 	// A new session answers the new filter, and its partitions start over.
 	readsFail.Store(true)
 	f.changeFilter(&wire.Filter{
-		ClaimedProtocols: []string{"acme.meter:1"}, ProtocolDefinitionIds: []string{"definition"}, PrincipalDeviceIds: []string{"principal"},
+		ClaimedProtocols: []string{"acme.meter:1"}, PrincipalDeviceIds: []string{"principal"},
 		GatewayGroupIds: []string{"group"}, ResolvedSourceDeviceIds: []string{"source"},
 		ProtocolStatuses: []wire.ProtocolStatus{wire.ProtocolStatus_PROTOCOL_STATUS_MATCHED, wire.ProtocolStatus_PROTOCOL_STATUS_MISMATCH},
 		Labels:           []string{"site-a"},
@@ -270,7 +270,7 @@ func TestSnapshotReportsTheFilterAndThePartitions(t *testing.T) {
 	})
 	s = p.Snapshot()
 	want := processor.Filter{
-		ClaimedProtocols: []string{"acme.meter:1"}, ProtocolDefinitionIDs: []string{"definition"}, PrincipalDeviceIDs: []string{"principal"},
+		ClaimedProtocols: []string{"acme.meter:1"}, PrincipalDeviceIDs: []string{"principal"},
 		GatewayGroupIDs: []string{"group"}, ResolvedSourceDeviceIDs: []string{"source"},
 		ProtocolStatuses: []processor.ProtocolStatus{processor.ProtocolMatched, processor.ProtocolMismatch},
 		Labels:           []string{"site-a"},
@@ -536,7 +536,7 @@ func TestPermissionDeniedEndsRun(t *testing.T) {
 	t.Parallel()
 	for name, denial := range map[string]error{
 		"with the detail":    failure(codes.PermissionDenied, "permission_denied"),
-		"by the status code": status.Error(codes.PermissionDenied, "no processor scope"),
+		"by the status code": status.Error(codes.PermissionDenied, "no runtime scope"),
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -551,7 +551,7 @@ func TestPermissionDeniedEndsRun(t *testing.T) {
 			var e *processor.Error
 			if !errors.Is(err, processor.ErrorPermissionDenied) || !errors.As(err, &e) || e.Op != "open_session" ||
 				len(f.callsOf("OpenSession")) != 1 {
-				t.Errorf("Run with a token without the processor scope = %v after %d calls", err, len(f.callsOf("OpenSession")))
+				t.Errorf("Run with a token without the runtime scope = %v after %d calls", err, len(f.callsOf("OpenSession")))
 			}
 		})
 	}

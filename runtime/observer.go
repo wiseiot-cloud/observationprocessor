@@ -75,14 +75,18 @@ type PartitionSnapshot struct {
 
 // Filter is the filter of a processor: which raw observations it receives.
 type Filter struct {
-	ClaimedProtocols        []string
-	ProtocolDefinitionIDs   []string
-	PrincipalDeviceIDs      []string
-	GatewayGroupIDs         []string
+	ClaimedProtocols []string
+	// PrincipalDeviceIDs matches the publishing device; for a radio reception the gateway that
+	// received it first.
+	PrincipalDeviceIDs []string
+	// GatewayGroupIDs matches radio receptions only.
+	GatewayGroupIDs []string
+	// ResolvedSourceDeviceIDs matches the device that an observation is about; system observations
+	// have none.
 	ResolvedSourceDeviceIDs []string
 	ProtocolStatuses        []ProtocolStatus
 	// Labels matches the observations that carry one of these labels of their resolved source
-	// device.
+	// device, or of their device for a system observation.
 	Labels []string
 }
 
@@ -93,7 +97,6 @@ func filterFrom(f *wire.Filter) Filter {
 	}
 	return Filter{
 		ClaimedProtocols:        f.GetClaimedProtocols(),
-		ProtocolDefinitionIDs:   f.GetProtocolDefinitionIds(),
 		PrincipalDeviceIDs:      f.GetPrincipalDeviceIds(),
 		GatewayGroupIDs:         f.GetGatewayGroupIds(),
 		ResolvedSourceDeviceIDs: f.GetResolvedSourceDeviceIds(),

@@ -20,7 +20,7 @@ const (
 	// ErrorUnauthenticated: Access refused the API token, or the CredentialProvider failed. Run
 	// ends.
 	ErrorUnauthenticated ErrorCode = "unauthenticated"
-	// ErrorPermissionDenied: the API token lacks the processor scope, or is limited to device labels
+	// ErrorPermissionDenied: the API token lacks the runtime scope, or is limited to device labels
 	// that do not cover the labels of the processor's filter. Run ends.
 	ErrorPermissionDenied ErrorCode = "permission_denied"
 	// ErrorProcessorNotFound: the processor does not exist. Run ends.

@@ -681,18 +681,25 @@ func (*CloseSessionResponse) Descriptor() ([]byte, []int) {
 }
 
 // An observation matches a field when the field is empty or one of its values equals the
-// observation's, and the filter when it matches every field. A filter without claimed_protocols
-// therefore also selects the system observations; one with claimed_protocols selects them only
-// when it lists their reserved protocol, such as "wiz.access.session:1".
+// observation's, and the filter when it matches every field. A system observation has its device
+// as principal and the label of that device, a reserved protocol such as "wiz.access.session:1"
+// and PROTOCOL_STATUS_SYSTEM, and no gateway group or resolved source device: a filter selects it
+// only without gateway_group_ids and resolved_source_device_ids, and with claimed_protocols or
+// protocol_statuses only when they list its protocol or PROTOCOL_STATUS_SYSTEM.
 type Filter struct {
-	state                   protoimpl.MessageState `protogen:"open.v1"`
-	ClaimedProtocols        []string               `protobuf:"bytes,1,rep,name=claimed_protocols,json=claimedProtocols,proto3" json:"claimed_protocols,omitempty"`
-	ProtocolDefinitionIds   []string               `protobuf:"bytes,2,rep,name=protocol_definition_ids,json=protocolDefinitionIds,proto3" json:"protocol_definition_ids,omitempty"`
-	PrincipalDeviceIds      []string               `protobuf:"bytes,3,rep,name=principal_device_ids,json=principalDeviceIds,proto3" json:"principal_device_ids,omitempty"`
-	GatewayGroupIds         []string               `protobuf:"bytes,4,rep,name=gateway_group_ids,json=gatewayGroupIds,proto3" json:"gateway_group_ids,omitempty"`
-	ResolvedSourceDeviceIds []string               `protobuf:"bytes,5,rep,name=resolved_source_device_ids,json=resolvedSourceDeviceIds,proto3" json:"resolved_source_device_ids,omitempty"`
-	ProtocolStatuses        []ProtocolStatus       `protobuf:"varint,6,rep,packed,name=protocol_statuses,json=protocolStatuses,proto3,enum=wiseiot.access.processor.v1.ProtocolStatus" json:"protocol_statuses,omitempty"`
-	Labels                  []string               `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The protocols that observations claim, registered or not.
+	ClaimedProtocols []string `protobuf:"bytes,1,rep,name=claimed_protocols,json=claimedProtocols,proto3" json:"claimed_protocols,omitempty"`
+	// The devices that published observations over their own session; for a radio reception the
+	// gateway that received it first, so a gateway selects only some radio receptions of its group.
+	PrincipalDeviceIds []string `protobuf:"bytes,3,rep,name=principal_device_ids,json=principalDeviceIds,proto3" json:"principal_device_ids,omitempty"`
+	// Only radio receptions have a gateway group.
+	GatewayGroupIds []string `protobuf:"bytes,4,rep,name=gateway_group_ids,json=gatewayGroupIds,proto3" json:"gateway_group_ids,omitempty"`
+	// The devices that observations are about: the publishing device for its own source key, and
+	// the child that a route resolves a physical source key to.
+	ResolvedSourceDeviceIds []string         `protobuf:"bytes,5,rep,name=resolved_source_device_ids,json=resolvedSourceDeviceIds,proto3" json:"resolved_source_device_ids,omitempty"`
+	ProtocolStatuses        []ProtocolStatus `protobuf:"varint,6,rep,packed,name=protocol_statuses,json=protocolStatuses,proto3,enum=wiseiot.access.processor.v1.ProtocolStatus" json:"protocol_statuses,omitempty"`
+	Labels                  []string         `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty"`
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }
@@ -730,13 +737,6 @@ func (*Filter) Descriptor() ([]byte, []int) {
 func (x *Filter) GetClaimedProtocols() []string {
 	if x != nil {
 		return x.ClaimedProtocols
-	}
-	return nil
-}
-
-func (x *Filter) GetProtocolDefinitionIds() []string {
-	if x != nil {
-		return x.ProtocolDefinitionIds
 	}
 	return nil
 }
@@ -1150,10 +1150,9 @@ const file_wiseiot_access_processor_v1_processor_runtime_proto_rawDesc = "" +
 	"\x13CloseSessionRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\"\x16\n" +
-	"\x14CloseSessionResponse\"\xfa\x02\n" +
+	"\x14CloseSessionResponse\"\xc2\x02\n" +
 	"\x06Filter\x12+\n" +
-	"\x11claimed_protocols\x18\x01 \x03(\tR\x10claimedProtocols\x126\n" +
-	"\x17protocol_definition_ids\x18\x02 \x03(\tR\x15protocolDefinitionIds\x120\n" +
+	"\x11claimed_protocols\x18\x01 \x03(\tR\x10claimedProtocols\x120\n" +
 	"\x14principal_device_ids\x18\x03 \x03(\tR\x12principalDeviceIds\x12*\n" +
 	"\x11gateway_group_ids\x18\x04 \x03(\tR\x0fgatewayGroupIds\x12;\n" +
 	"\x1aresolved_source_device_ids\x18\x05 \x03(\tR\x17resolvedSourceDeviceIds\x12X\n" +

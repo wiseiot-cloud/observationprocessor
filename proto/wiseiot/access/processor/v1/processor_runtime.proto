@@ -9,7 +9,7 @@ option go_package = "github.com/kai/wiseiot/internal/access/generated/proto/proc
 
 // ProcessorRuntimeService is served by wiz-acs-core for the runtime of Observation Processors,
 // such as the Go SDK. Every call carries the metadata "authorization: Bearer <API token>", with
-// an API token of the REST API that holds the processor scope. A token limited to device labels
+// an API token of the REST API that holds the runtime scope. A token limited to device labels
 // may open only a processor whose filter selects labels, all of them labels of the token; since a
 // filter change fences the session, the check at OpenSession covers the whole session.
 //
@@ -21,7 +21,7 @@ option go_package = "github.com/kai/wiseiot/internal/access/generated/proto/proc
 // Every error that the service answers has one ErrorDetail, whose code is one of:
 //
 //   UNAUTHENTICATED      unauthenticated      no valid API token, for whatever reason
-//   PERMISSION_DENIED    permission_denied    the API token lacks the processor scope, or
+//   PERMISSION_DENIED    permission_denied    the API token lacks the runtime scope, or
 //                                            OpenSession of a processor outside its labels
 //   INVALID_ARGUMENT     invalid_argument     a request field is invalid; the message names it
 //   NOT_FOUND            not_found            OpenSession of an unknown processor
@@ -141,14 +141,21 @@ message CloseSessionRequest {
 message CloseSessionResponse {}
 
 // An observation matches a field when the field is empty or one of its values equals the
-// observation's, and the filter when it matches every field. A filter without claimed_protocols
-// therefore also selects the system observations; one with claimed_protocols selects them only
-// when it lists their reserved protocol, such as "wiz.access.session:1".
+// observation's, and the filter when it matches every field. A system observation has its device
+// as principal and the label of that device, a reserved protocol such as "wiz.access.session:1"
+// and PROTOCOL_STATUS_SYSTEM, and no gateway group or resolved source device: a filter selects it
+// only without gateway_group_ids and resolved_source_device_ids, and with claimed_protocols or
+// protocol_statuses only when they list its protocol or PROTOCOL_STATUS_SYSTEM.
 message Filter {
+  // The protocols that observations claim, registered or not.
   repeated string claimed_protocols = 1;
-  repeated string protocol_definition_ids = 2;
+  // The devices that published observations over their own session; for a radio reception the
+  // gateway that received it first, so a gateway selects only some radio receptions of its group.
   repeated string principal_device_ids = 3;
+  // Only radio receptions have a gateway group.
   repeated string gateway_group_ids = 4;
+  // The devices that observations are about: the publishing device for its own source key, and
+  // the child that a route resolves a physical source key to.
   repeated string resolved_source_device_ids = 5;
   repeated ProtocolStatus protocol_statuses = 6;
   repeated string labels = 7;
